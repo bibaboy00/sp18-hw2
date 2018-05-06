@@ -40,13 +40,23 @@ public class GlobeSortClient {
 
     public void run(Integer[] values) throws Exception {
         System.out.println("Pinging " + serverStr + "...");
+	long startPing = System.currentTimeMillis();
         serverStub.ping(Empty.newBuilder().build());
+	long endPing = System.currentTimeMillis();
         System.out.println("Ping successful.");
 
         System.out.println("Requesting server to sort array");
+	long start = System.currentTimeMillis();;
         IntArray request = IntArray.newBuilder().addAllValues(Arrays.asList(values)).build();
         IntArray response = serverStub.sortIntegers(request);
+	long end = System.currentTimeMillis();
         System.out.println("Sorted array");
+	
+	int sortTime = response.getValues(response.getValuesCount() - 1);
+        System.out.println("Total time: " + (end - start) / 1000.0);
+        System.out.println("Latency: " + (endPing - startPing) / 1000.0);
+        System.out.println("Application-level Throughput: " + values.length / ((end - start) / 1000.0));
+        System.out.println("Network-levle Throughput: " + values.length / ((end - start - endPing + startPing - sortTime) / 2 / 1000.0));
     }
 
     public void shutdown() throws InterruptedException {
